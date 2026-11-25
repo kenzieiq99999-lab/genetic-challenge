@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Genetic Challenge</title>
+<style>
+:root{--bg:#0b1120;--card:#141c33;--card2:#1b2545;--line:#2a3763;--tx:#e8ecf8;--mu:#93a0c4;--blue:#4c7dff;--pur:#8b5cf6;--ok:#22c55e;--bad:#ef4444;--lc:#22c55e}
+*{box-sizing:border-box;margin:0}
+html,body{min-height:100%}
+body{background:radial-gradient(circle at 15% 0,#18235a 0,transparent 45%),radial-gradient(circle at 90% 100%,#2b1860 0,transparent 45%),var(--bg);color:var(--tx);font:16px/1.55 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+#dna{position:fixed;right:-30px;top:0;height:100%;width:200px;opacity:.16;pointer-events:none}
+#app{position:relative;max-width:720px;margin:0 auto;padding:20px 16px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+.view{animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+h1{font-size:clamp(2.2rem,8vw,3.4rem);line-height:1.05;letter-spacing:-.02em;font-weight:800;background:linear-gradient(90deg,#7aa2ff,#b18cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:1.3rem;line-height:1.35}
+.sub{color:var(--mu);margin:10px 0 24px}
+.btn{font:inherit;font-weight:600;border:0;border-radius:12px;padding:13px 20px;cursor:pointer;color:#fff;background:linear-gradient(90deg,var(--blue),var(--pur));transition:transform .15s,opacity .15s}
+.btn:hover:not(:disabled){transform:translateY(-1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--tx)}
+.btn.full{width:100%}
+:focus-visible{outline:3px solid #9db6ff;outline-offset:2px}
+.menu{padding-top:8vh}
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 26px}
+.rules div{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--lc);border-radius:10px;padding:10px;font-size:.85rem;color:var(--mu)}
+.rules b{display:block;color:var(--tx)}
+label{display:block;font-weight:600;margin-bottom:8px}
+input{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:6px}
+.err{color:#ff8b8b;min-height:1.5em;font-size:.9rem;margin-bottom:10px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-size:.92rem;color:var(--mu)}
+.badge{display:inline-block;padding:3px 12px;border-radius:99px;font-weight:700;font-size:.85rem;color:#0b1120;background:var(--lc)}
+.bar{display:grid;gap:3px;margin-bottom:18px}
+.bar i{height:7px;border-radius:4px;background:var(--line)}
+.bar i.done{background:var(--lc)}
+.bar i.cur{background:var(--lc);box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--lc)}
+.q{font-size:1.15rem;line-height:1.5;margin-bottom:18px}
+.opt{display:flex;gap:12px;width:100%;text-align:left;font:inherit;color:var(--tx);background:var(--card2);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s,background .15s}
+.opt:hover:not(:disabled){border-color:var(--blue)}
+.opt b{flex:0 0 26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:.85rem;background:var(--line)}
+.opt.sel{border-color:var(--blue);background:#1e2d63}
+.opt.sel b{background:var(--blue)}
+.opt.right{border-color:var(--ok);background:#12351f}
+.opt.right b{background:var(--ok);color:#06210f}
+.opt.wrong{border-color:var(--bad);background:#401822}
+.opt.wrong b{background:var(--bad)}
+.opt:disabled{cursor:default}
+.fb{border-radius:12px;padding:14px 16px;margin:6px 0 16px;background:var(--card2);border-left:4px solid var(--ok);animation:in .3s}
+.fb.no{border-left-color:var(--bad)}
+.fb strong{display:block;margin-bottom:4px}
+.center{text-align:center}
+.intro{padding:34px 22px;border-top:5px solid var(--lc)}
+.intro h1{font-size:2.6rem;-webkit-text-fill-color:var(--lc);background:none;color:var(--lc)}
+.big{font-size:3.4rem;font-weight:800;line-height:1.1}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.stats div{background:var(--card2);border-radius:12px;padding:12px;text-align:center}
+.stats b{display:block;font-size:1.5rem}
+.stats span{color:var(--mu);font-size:.82rem}
+.row{margin:12px 0}
+.row .h{display:flex;justify-content:space-between;font-size:.92rem;margin-bottom:5px}
+.track{height:9px;background:var(--line);border-radius:6px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--lc);border-radius:6px}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.acts .btn{flex:1 1 150px}
+.rv{margin-bottom:14px;border-left:5px solid var(--bad)}
+.rv.ok{border-left-color:var(--ok)}
+.rv .m{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:.88rem;color:var(--mu)}
+.rv p{margin:6px 0}
+.tag{font-weight:700}
+@media(max-width:520px){.rules{grid-template-columns:repeat(2,1fr)}.stats b{font-size:1.25rem}.big{font-size:2.8rem}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg id="dna" aria-hidden="true" viewBox="0 0 200 800"></svg>
+<main id="app"></main>
+<script>
+(function(){
+"use strict";
+var LV={easy:{n:"Mudah",c:"#22c55e",p:10,d:"Definisi dasar dan fungsi DNA serta RNA."},medium:{n:"Sedang",c:"#3b82f6",p:15,d:"Perbedaan DNA dan RNA, nukleotida, dan basa nitrogen."},hard:{n:"Sulit",c:"#f59e0b",p:20,d:"Hubungan gen, DNA, kromosom, dan kromatin."},hots:{n:"HOTS",c:"#a855f7",p:25,d:"Menganalisis skenario dan menarik kesimpulan."}};
+var ORDER=["easy","medium","hard","hots"];
+var Q=[
+{l:"easy",q:"Molekul yang menyimpan informasi genetik dan diwariskan kepada keturunan adalah …",o:["Lemak","DNA","Glukosa","Vitamin"],a:1,e:"DNA (asam deoksiribonukleat) menyimpan informasi genetik dan diturunkan dari induk kepada keturunannya. Lemak, glukosa, dan vitamin tidak membawa informasi genetik."},
+{l:"easy",q:"Salah satu fungsi utama RNA di dalam sel adalah …",o:["menyimpan informasi genetik permanen","membungkus DNA di dalam inti","menghasilkan energi bagi sel","membantu sintesis protein"],a:3,e:"RNA (asam ribonukleat) berperan dalam sintesis protein berdasarkan informasi dari DNA. Penyimpanan informasi genetik jangka panjang dilakukan oleh DNA."},
+{l:"easy",q:"Gen adalah …",o:["bagian DNA penentu sifat","protein pelindung kromosom","organel penghasil energi","sel kelamin makhluk hidup"],a:0,e:"Gen adalah segmen (bagian) DNA yang membawa informasi untuk sifat tertentu. Gen bukan protein, organel, ataupun sel."},
+{l:"easy",q:"Pada sel hewan dan tumbuhan, kromosom terdapat di dalam …",o:["ribosom","vakuola","inti sel","membran sel"],a:2,e:"Kromosom berada di dalam inti sel (nukleus). Ribosom tempat pembentukan protein, vakuola menyimpan cairan, dan membran sel membatasi sel."},
+{l:"medium",q:"Gula penyusun nukleotida RNA adalah …",o:["glukosa","deoksiribosa","ribosa","fruktosa"],a:2,e:"Nukleotida RNA mengandung gula ribosa, sedangkan nukleotida DNA mengandung gula deoksiribosa. Glukosa dan fruktosa bukan penyusun nukleotida."},
+{l:"medium",q:"Pernyataan yang benar mengenai bentuk DNA dan RNA adalah …",o:["keduanya berupa dua untai berpilin","keduanya berupa satu untai lurus","DNA satu untai, RNA dua untai","DNA dua untai, RNA satu untai"],a:3,e:"DNA umumnya berbentuk dua untai yang berpilin (heliks ganda), sedangkan RNA umumnya berupa satu untai."},
+{l:"medium",q:"Komponen berikut yang BUKAN penyusun nukleotida adalah …",o:["asam amino","gugus fosfat","gula pentosa","basa nitrogen"],a:0,e:"Nukleotida tersusun atas gula pentosa, gugus fosfat, dan basa nitrogen. Asam amino adalah penyusun protein."},
+{l:"medium",q:"Pada RNA, basa nitrogen timin digantikan oleh …",o:["adenin","sitosin","guanin","urasil"],a:3,e:"RNA memiliki basa adenin, urasil, guanin, dan sitosin. Urasil menggantikan timin yang hanya ada pada DNA."},
+{l:"medium",q:"Basa-basa nitrogen penyusun DNA adalah …",o:["A, U, G, dan C","A, T, U, dan G","A, T, G, dan C","T, U, G, dan C"],a:2,e:"DNA tersusun atas adenin (A), timin (T), guanin (G), dan sitosin (C). Urasil (U) tidak ditemukan pada DNA."},
+{l:"medium",q:"Pada DNA, basa adenin berpasangan dengan basa …",o:["urasil","timin","guanin","sitosin"],a:1,e:"Pada DNA, adenin berpasangan dengan timin (A–T), dan guanin berpasangan dengan sitosin (G–C). Urasil hanya terdapat pada RNA."},
+{l:"hard",q:"Urutan dari yang paling besar ke yang paling kecil dalam organisasi materi genetik adalah …",o:["gen, kromosom, DNA, nukleotida","kromosom, DNA, gen, nukleotida","DNA, gen, kromosom, nukleotida","nukleotida, gen, DNA, kromosom"],a:1,e:"Kromosom tersusun atas DNA, gen adalah bagian dari DNA, dan DNA tersusun atas banyak nukleotida. Urutan dari besar ke kecil: kromosom, DNA, gen, nukleotida."},
+{l:"hard",q:"Ketika sel akan membelah, benang-benang kromatin di dalam inti akan …",o:["terurai menjadi nukleotida","berubah menjadi molekul RNA","menggulung menjadi kromosom","terbelah menjadi gen terpisah"],a:2,e:"Saat sel akan membelah, kromatin memadat dan menggulung sehingga tampak jelas sebagai kromosom. Bentuk ini memudahkan pembagian materi genetik ke sel anak."},
+{l:"hard",q:"Kromatin tersusun atas …",o:["DNA dan protein","RNA dan lemak","gen dan karbohidrat","nukleotida dan air"],a:0,e:"Kromatin adalah DNA yang berikatan dengan protein, tampak seperti benang halus pada inti sel yang tidak sedang membelah."},
+{l:"hard",q:"Informasi genetik pada DNA tersimpan dalam …",o:["rangka gula dan fosfat","jumlah gugus fosfat","jenis gula pentosa","urutan basa nitrogen"],a:3,e:"Gula dan fosfat membentuk rangka untai DNA. Kode informasi genetik tersimpan pada urutan basa nitrogen, seperti urutan huruf pada sebuah kata."},
+{l:"hard",q:"Dua kromatid kembar pada satu kromosom melekat pada bagian yang disebut …",o:["lengan kromatid","sentrosom","sentromer","nukleolus"],a:2,e:"Sentromer adalah bagian kromosom tempat dua kromatid kembar saling melekat. Sentrosom berperan saat pembelahan sel, sedangkan nukleolus adalah bagian dalam inti."},
+{l:"hard",q:"Pernyataan yang benar mengenai hubungan gen dan DNA adalah …",o:["Gen berukuran lebih besar daripada kromosom","Gen merupakan sebagian kecil dari DNA","Gen terpisah dari DNA di dalam inti","Gen adalah gabungan beberapa kromosom"],a:1,e:"Gen adalah segmen DNA, sehingga satu molekul DNA memuat banyak gen. Gen jauh lebih kecil daripada kromosom."},
+{l:"hots",q:"Ahli forensik menemukan rambut berakar di tempat kejadian dan mencocokkan DNA-nya dengan DNA beberapa orang. DNA dapat dipakai mengenali seseorang karena …",o:["DNA setiap orang sama persis","DNA seseorang berubah setiap hari","urutan basa tiap orang khas","DNA hanya ada di sel darah"],a:2,e:"Urutan basa nitrogen DNA tiap individu khas (kecuali kembar identik), sehingga dapat dicocokkan. DNA terdapat di semua sel berinti dan tidak berubah setiap hari."},
+{l:"hots",q:"Dina memiliki warna rambut yang sama dengan ayahnya. Penjelasan yang paling tepat tentang pewarisannya adalah …",o:["Pigmen ayah berpindah ke janin","Kromosom dari ayah lebih banyak","Sifat ayah menular lewat darah","Gen pada kromosom dibawa sperma"],a:3,e:"Sifat diwariskan melalui gen pada DNA di dalam kromosom yang dibawa sel kelamin (sperma dan sel telur). Pigmen tidak berpindah langsung, dan jumlah kromosom dari ayah dan ibu sama banyak."},
+{l:"hots",q:"Seorang siswa mengamati sel kulit dan sel otot dari orang yang sama. Kedua sel punya fungsi berbeda. Kesimpulan yang paling mungkin tentang DNA keduanya adalah …",o:["DNA kedua sel berbeda total","kedua sel memiliki DNA sama","sel otot tidak memiliki DNA","sel kulit hanya memiliki RNA"],a:1,e:"Semua sel tubuh berasal dari satu sel awal sehingga membawa DNA yang sama. Perbedaan fungsi terjadi karena gen yang aktif pada tiap jenis sel berbeda."},
+{l:"hots",q:"Seorang peneliti menganalisis dua sampel. Sampel X mengandung timin dan berupa dua untai. Sampel Y mengandung urasil dan berupa satu untai. Kesimpulan yang tepat adalah …",o:["X adalah DNA, Y adalah RNA","X adalah RNA, Y adalah DNA","X dan Y sama-sama DNA","X dan Y sama-sama RNA"],a:0,e:"Timin dan dua untai adalah ciri DNA, sedangkan urasil dan satu untai adalah ciri RNA. Jadi X adalah DNA dan Y adalah RNA."}
+];
+var MAX=Q.reduce(function(s,x){return s+LV[x.l].p},0);
+var app=document.getElementById("app");
+var S={name:"",i:0,ans:[],sel:null,locked:false};
+
+function esc(t){var d=document.createElement("div");d.textContent=t;return d.innerHTML}
+function col(l){return "--lc:"+LV[l].c}
+function L(i){return String.fromCharCode(65+i)}
+function view(h){app.innerHTML='<div class="view">'+h+'</div>';window.scrollTo(0,0)}
+
+/* DNA decoration */
+(function(){var s="",a="",b="",r="";for(var y=0;y<=800;y+=8){var x1=100+60*Math.sin(y/55),x2=100-60*Math.sin(y/55);a+=(y?"L":"M")+x1.toFixed(1)+" "+y;b+=(y?"L":"M")+x2.toFixed(1)+" "+y;if(y%32===0)r+='<line x1="'+x1.toFixed(1)+'" y1="'+y+'" x2="'+x2.toFixed(1)+'" y2="'+y+'" stroke="#8b5cf6" stroke-width="3"/>'}
+document.getElementById("dna").innerHTML=r+'<path d="'+a+'" fill="none" stroke="#4c7dff" stroke-width="4"/><path d="'+b+'" fill="none" stroke="#8b5cf6" stroke-width="4"/>'})();
+
+function menu(){
+ var rules=ORDER.map(function(k){var n=Q.filter(function(x){return x.l===k}).length;return '<div style="'+col(k)+'"><b>'+LV[k].n+'</b>'+n+' soal · '+LV[k].p+' poin</div>'}).join("");
+ view('<section class="menu"><h1>GENETIC CHALLENGE</h1><p class="sub">Test Your Knowledge of Heredity.<br>Biologi: Materi Genetik dan Pewarisan Sifat · '+Q.length+' soal · skor maksimum '+MAX+'</p><div class="rules">'+rules+'</div><button class="btn full" id="go">Mulai</button></section>');
+ document.getElementById("go").onclick=nameScreen;
+}
+function nameScreen(){
+ view('<section class="card"><h2>Siapa nama panggilanmu?</h2><p class="sub">Nama ini akan tampil di papan hasil.</p><label for="nm">Nama panggilan</label><input id="nm" maxlength="16" autocomplete="off" placeholder="2–16 karakter" value="'+esc(S.name)+'"><div class="err" id="er"></div><div class="acts" style="margin-top:0"><button class="btn ghost" id="bk">Kembali</button><button class="btn" id="st">Mulai kuis</button></div></section>');
+ var inp=document.getElementById("nm");inp.focus();
+ function go(){var v=inp.value.trim();if(v.length<2){document.getElementById("er").textContent="Nama panggilan minimal 2 karakter.";return}S.name=v;start()}
+ document.getElementById("st").onclick=go;
+ document.getElementById("bk").onclick=menu;
+ inp.onkeydown=function(e){if(e.key==="Enter")go()};
+}
+function start(){S.i=0;S.ans=[];S.sel=null;S.locked=false;levelIntro()}
+function levelIntro(){
+ var l=Q[S.i].l,n=Q.filter(function(x){return x.l===l}).length;
+ view('<section class="card intro center" style="'+col(l)+'"><p class="sub" style="margin:0 0 6px">Level berikutnya</p><h1>'+LV[l].n+'</h1><p class="sub">'+LV[l].d+'<br>'+n+' soal · '+LV[l].p+' poin per jawaban benar</p><button class="btn" id="c">Lanjut</button></section>');
+ document.getElementById("c").onclick=question;
+}
+function bar(){var h="";for(var k=0;k<Q.length;k++){h+='<i style="'+col(Q[k].l)+'" class="'+(k<S.i||(k===S.i&&S.locked)?"done":k===S.i?"cur":"")+'"></i>'}return '<div class="bar" aria-hidden="true" style="grid-template-columns:repeat('+Q.length+',1fr)">'+h+'</div>'}
+function score(){return S.ans.reduce(function(s,a,k){return s+(a===Q[k].a?LV[Q[k].l].p:0)},0)}
+function question(){
+ var q=Q[S.i];S.sel=null;S.locked=false;draw();
+}
+function draw(fb){
+ var q=Q[S.i],opts=q.o.map(function(t,k){
+  var c="opt";if(S.locked){if(k===q.a)c+=" right";else if(k===S.sel)c+=" wrong"}else if(k===S.sel)c+=" sel";
+  return '<button class="'+c+'" data-k="'+k+'"'+(S.locked?" disabled":"")+' aria-pressed="'+(k===S.sel)+'"><b>'+L(k)+'</b><span>'+esc(t)+'</span></button>'}).join("");
+ var ok=S.sel===q.a,f="";
+ if(S.locked)f='<div class="fb '+(ok?"":"no")+'" role="status"><strong>'+(ok?"Benar! +"+LV[q.l].p+" poin":"Kurang tepat. Jawaban yang benar: "+L(q.a))+'</strong>'+esc(q.e)+'</div>';
+ var btn=S.locked?'<button class="btn full" id="nx">'+(S.i<Q.length-1?"Soal berikutnya":"Lihat hasil")+'</button>':'<button class="btn full" id="cf"'+(S.sel===null?" disabled":"")+'>Konfirmasi jawaban</button>';
+ view('<section style="'+col(q.l)+'"><div class="top"><span><span class="badge">'+LV[q.l].n+'</span> &nbsp;Soal '+(S.i+1)+' dari '+Q.length+'</span><span>'+esc(S.name)+' · Skor '+score()+'</span></div>'+bar()+'<div class="card"><p class="q">'+esc(q.q)+'</p>'+opts+f+btn+'</div></section>');
+ if(!S.locked)app.querySelectorAll(".opt").forEach(function(b){b.onclick=function(){S.sel=+b.dataset.k;draw()}});
+ var cf=document.getElementById("cf");if(cf)cf.onclick=function(){if(S.sel===null)return;S.locked=true;S.ans[S.i]=S.sel;draw()};
+ var nx=document.getElementById("nx");if(nx)nx.onclick=next;
+}
+function next(){
+ if(S.i>=Q.length-1){result();return}
+ S.i++;S.locked=false;S.sel=null;
+ if(Q[S.i].l!==Q[S.i-1].l)levelIntro();else question();
+}
+function desc(p){
+ if(p>=90)return "Pemahamanmu tentang materi genetik sangat kuat. Hampir semua konsep dikuasai dengan baik.";
+ if(p>=70)return "Pemahamanmu sudah baik. Tinjau lagi soal yang salah untuk menyempurnakannya.";
+ if(p>=50)return "Pemahamanmu cukup. Ulangi hubungan antara gen, DNA, kromosom, dan kromatin agar lebih mantap.";
+ return "Konsep dasar masih perlu dipelajari lagi. Gunakan penjelasan pada Tinjau Jawaban, lalu coba kembali.";
+}
+function result(){
+ var sc=score(),cor=0;S.ans.forEach(function(a,k){if(a===Q[k].a)cor++});
+ var inc=Q.length-cor,acc=Math.round(cor/Q.length*100);
+ var rows=ORDER.map(function(k){
+  var qs=Q.filter(function(x){return x.l===k}),c=0;
+  Q.forEach(function(x,j){if(x.l===k&&S.ans[j]===x.a)c++});
+  var mx=qs.length*LV[k].p,got=c*LV[k].p;
+  return '<div class="row" style="'+col(k)+'"><div class="h"><span>'+LV[k].n+' · '+c+'/'+qs.length+' benar</span><b>'+got+' / '+mx+'</b></div><div class="track"><i style="width:'+(got/mx*100)+'%"></i></div></div>'}).join("");
+ view('<section class="card center"><p class="sub" style="margin:0">Hasil akhir untuk</p><h2 style="margin-bottom:12px">'+esc(S.name)+'</h2><div class="big" style="background:linear-gradient(90deg,#7aa2ff,#b18cff);-webkit-background-clip:text;background-clip:text;color:transparent">'+sc+'<small style="font-size:1.3rem;-webkit-text-fill-color:var(--mu)"> / '+MAX+'</small></div><p class="sub" style="margin-bottom:0">'+desc(sc/MAX*100)+'</p><div class="stats"><div><b style="color:var(--ok)">'+cor+'</b><span>Benar</span></div><div><b style="color:var(--bad)">'+inc+'</b><span>Salah</span></div><div><b>'+acc+'%</b><span>Akurasi</span></div></div><div style="text-align:left">'+rows+'</div><div class="acts"><button class="btn" id="rv">Tinjau jawaban</button><button class="btn" id="pa">Main lagi</button><button class="btn ghost" id="mm">Menu utama</button></div></section>');
+ document.getElementById("rv").onclick=review;
+ document.getElementById("pa").onclick=start;
+ document.getElementById("mm").onclick=menu;
+}
+function review(){
+ var h=Q.map(function(q,k){
+  var ok=S.ans[k]===q.a;
+  return '<article class="card rv '+(ok?"ok":"")+'" style="'+col(q.l)+'"><div class="m"><span>Soal '+(k+1)+' · <span class="badge">'+LV[q.l].n+'</span></span><span class="tag" style="color:'+(ok?"var(--ok)":"var(--bad)")+'">'+(ok?"Benar":"Salah")+'</span></div><p class="q" style="font-size:1.05rem">'+esc(q.q)+'</p><p>Jawabanmu: <b style="color:'+(ok?"var(--ok)":"var(--bad)")+'">'+L(S.ans[k])+'. '+esc(q.o[S.ans[k]])+'</b></p>'+(ok?"":'<p>Jawaban benar: <b style="color:var(--ok)">'+L(q.a)+'. '+esc(q.o[q.a])+'</b></p>')+'<div class="fb '+(ok?"":"no")+'">'+esc(q.e)+'</div></article>'}).join("");
+ view('<div class="top"><h2>Tinjau jawaban</h2><span>'+esc(S.name)+' · Skor '+score()+' / '+MAX+'</span></div>'+h+'<div class="acts"><button class="btn" id="br">Kembali ke hasil</button><button class="btn" id="pa">Main lagi</button><button class="btn ghost" id="mm">Menu utama</button></div>');
+ document.getElementById("br").onclick=result;
+ document.getElementById("pa").onclick=start;
+ document.getElementById("mm").onclick=menu;
+}
+menu();
+})();
+</script>
+</body>
+</html>
